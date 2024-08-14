@@ -1,26 +1,38 @@
-const express = require('express')
-const bookRoutes =  require ('./routes/bookRoutes')
-const authorRoutes = require ('./routes/authorRoutes')
+const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors')
-const app = express()
-const port = 3000
+const cors = require('cors');
+require('dotenv').config(); // Load environment variables
 
-app.use(cors())
-app.use(express.json())
+const app = express();
+const port = process.env.PORT || 3000; // Use environment port or default to 3000
 
-app.use('/books', bookRoutes)
-app.use('/author', authorRoutes)
+app.use(cors());
+app.use(express.json());
 
+// Import routes
+const bookRoutes = require('./routes/bookRoutes');
+const authorRoutes = require('./routes/authorRoutes');
+const userRoutes = require('./routes/userRoutes');
 
+// Use routes
+app.use('/books', bookRoutes);
+app.use('/authors', authorRoutes);
+app.use('/users', userRoutes); // Added user routes
+
+// Root route
+app.get('/', (req, res) => {
+    res.send('Welcome to the Bookvault Backend');
+});
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('MongoDB connected'))
+    .catch((err) => {
+        console.error('MongoDB connection error:', err.message);
+        process.exit(1);
+    });
+
+// Start server
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
-
-main().then(()=>console.log("connected")).catch(err => console.log(err));
-
-async function main() {
-  await mongoose.connect('mongodb+srv://vivekchandran663:GqEL3Jysad7mXpjx@cluster0.tkdlc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
-
-  // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
-}
+    console.log(`Server is running on port ${port}`);
+});
